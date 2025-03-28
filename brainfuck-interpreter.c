@@ -12,8 +12,8 @@ int execute_bf(FILE* fptr){
     }
     size_t pc = 0, memc = 0;
     
-    size_t capacity = 10, size = 0;
-    size_t *loop_counters = (size_t *)calloc(capacity, sizeof(size_t));
+    size_t loop_stack_capacity = 10, loops = 0;
+    size_t *loop_counters = (size_t *)calloc(loop_stack_capacity, sizeof(size_t));
     if(!loop_counters){
         fprintf(stderr, "Failure allocating memory\n");
         return EXIT_FAILURE;
@@ -21,9 +21,9 @@ int execute_bf(FILE* fptr){
 
     char c;
     while((c = fgetc(fptr)) != EOF){
-        if(size == capacity){
-            capacity *= 2;
-            size_t *new_data = (size_t *)realloc(loop_counters, capacity * sizeof(size_t));
+        if(loops == loop_stack_capacity){
+            loop_stack_capacity *= 2;
+            size_t *new_data = (size_t *)realloc(loop_counters, loop_stack_capacity * sizeof(size_t));
             loop_counters = new_data;
         }
 
@@ -48,14 +48,14 @@ int execute_bf(FILE* fptr){
             putchar(memory[memc]);
             break;
         case '[':
-            loop_counters[size++] = pc;
+            loop_counters[loops++] = pc;
             break;
         case ']':
-            if(size == 0)
+            if(loops == 0)
                 return EXIT_FAILURE;
             
-            size_t go_back = loop_counters[--size];
-            loop_counters[size] = 0;
+            size_t go_back = loop_counters[--loops];
+            loop_counters[loops] = 0;
             
 
             if(memory[memc] != 0){
