@@ -71,6 +71,8 @@ int execute_bf(FILE* fptr){
 
     free(memory);
     free(loop_counters);
+
+    return EXIT_SUCCESS;
 }
 
 int main(int argc, char **argv){
