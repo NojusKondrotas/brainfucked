@@ -4,16 +4,16 @@
 
 #define MEMORY_SIZE 30000
 
-void print_memory(size_t index, size_t length, size_t memc, size_t pc, size_t loops, size_t loop_condition, unsigned short int *mem){
+void print_memory(size_t index, size_t length, size_t memc, size_t pc, size_t loops, size_t loop_condition, __u_char *mem){
     size_t end = index + length;
 
     while(index <= end)
-        printf("%hu ", mem[index++]);
-    printf("| memc : %zu | value at memc : %hu | loops : %zu | loop condition : %zu | pc : %zu\n", memc, mem[memc], loops, loop_condition, pc);
+        printf("%d ", (int)mem[index++]);
+    printf("| memc : %zu | value at memc : %d | loops : %zu | loop condition : %zu | pc : %zu\n", memc, (int)mem[memc], loops, loop_condition, pc);
 }
 
 int execute_bf(FILE* fptr){
-    unsigned short int *memory = (unsigned short int *)calloc(MEMORY_SIZE, sizeof(unsigned short int));
+    __u_char *memory = (__u_char *)calloc(MEMORY_SIZE, sizeof(__u_char));
     if(!memory){
         fprintf(stderr, "Failure allocating memory\n");
         return EXIT_FAILURE;
@@ -36,9 +36,9 @@ int execute_bf(FILE* fptr){
             loop_counters = new_data;
         }
 
-        #if defined(DEBUG) && defined(DEBUG_MEMORY_DEPTH)
+        #ifdef DEBUG
         print_memory(0, DEBUG_MEMORY_DEPTH, memc, pc, loops, invalid_loop, memory);
-        #elif defined (DEBUG)
+        #else
         print_memory(0, memc, memc, pc, loops, invalid_loop, memory);
         #endif
         
@@ -62,16 +62,19 @@ int execute_bf(FILE* fptr){
             memory[memc]--;
             break;
         case ',':
+            __u_short temp;
             #ifdef DEBUG
-            scanf("%hu", &memory[memc]);
+            scanf(" %hu", &temp);
             #else
-            scanf("%hu", &memory[memc]);
+            scanf(" %hu", &temp);
             #endif
+
+            memory[memc] = temp;
 
             break;
         case '.':
             #ifdef DEBUG
-            printf("printed value: %hu\n", memory[memc]);
+            printf("printed value: %hu\n", (__u_short)memory[memc]);
             #else
             putchar(memory[memc]);
             #endif
