@@ -9,7 +9,7 @@ void print_memory(size_t index, size_t length, size_t memc, size_t pc, size_t lo
 
     while(index <= end)
         printf("%d ", (int)mem[index++]);
-    printf("| memc : %zu | value at memc : %d | loops : %zu | loop condition : %zu | pc : %zu\n", memc, (int)mem[memc], loops, loop_condition, pc);
+    printf("| memc : %zu | value at memc : %hu | loops : %zu | loop condition : %zu | pc : %zu\n", memc, (__u_short)mem[memc], loops, loop_condition, pc);
 }
 
 int execute_bf(FILE* fptr){
@@ -38,8 +38,6 @@ int execute_bf(FILE* fptr){
 
         #ifdef DEBUG
         print_memory(0, DEBUG_MEMORY_DEPTH, memc, pc, loops, invalid_loop, memory);
-        #else
-        print_memory(0, memc, memc, pc, loops, invalid_loop, memory);
         #endif
         
         if(c != ']' && c != '[' && invalid_loop){
