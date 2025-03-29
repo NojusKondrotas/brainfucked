@@ -1,12 +1,14 @@
-flags=-Wall -Wextra -O2
+CC=gcc
+#DEBUG_FLAGS=-D DEBUG -D DEBUG_MEMORY_DEPTH=10
+CFLAGS=-Wall -Wextra -O2 $(DEBUG_FLAGS)
 
 all: clean brainfucked
 
 brainfucked: brainfuck-interpreter.o
-	gcc $(flags) $^ -o $@
+	$(CC) $(CFLAGS) $^ -o $@
 
 brainfuck-interpreter.o: brainfuck-interpreter.c
-	gcc $(flags) -c $^
+	$(CC) $(CFLAGS) -c $^
 
 clean:
-	rm -f brainfuck-interpreter.o brainfucked
+	rm -f *.o brainfucked
