@@ -1,2 +1,2 @@
 # brainfucked
-Brainfucked - a lightweight C interpreter for executing Brainfuck code.
+Brainfucked - a collection of interpreters for executing Brainfuck code.
