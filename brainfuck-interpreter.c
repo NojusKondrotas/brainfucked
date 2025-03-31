@@ -29,6 +29,11 @@ int execute_bf(FILE* fptr){
 
     char c;
     size_t invalid_loop = 0, invalid_loop_start_index = 0;
+
+    #ifdef DEBUG
+    size_t memory_index = 0;
+    #endif
+
     while((c = fgetc(fptr)) != EOF){
         if(loops == loop_stack_capacity){
             loop_stack_capacity *= 2;
@@ -36,10 +41,28 @@ int execute_bf(FILE* fptr){
             loop_counters = new_data;
         }
 
+        char command;
         #ifdef DEBUG
-        print_memory(0, DEBUG_MEMORY_DEPTH, memc, pc, loops, invalid_loop, memory);
+        printf("\nWaiting command: %c | pc: %zu\n", c, pc);
+        scanf(" %c", &command);
+        while(command == 'a' || command == 'd'){
+            while(getchar() != '\n');
+            //printf("%hu\n", command);
+            switch(command){
+                case 'a':
+                    --memory_index;
+                    break;
+                case 'd':
+                    ++memory_index;
+                    break;
+            }
+
+            print_memory(memory_index, DEBUG_MEMORY_DEPTH, memc, pc, loops, invalid_loop, memory);
+            scanf(" %c", &command);
+        }
+        printf("\nExecuting command: %c | pc: %zu\n", c, pc);
         #endif
-        
+
         if(c != ']' && c != '[' && invalid_loop){
             ++pc;
             continue;
@@ -61,11 +84,7 @@ int execute_bf(FILE* fptr){
             break;
         case ',':
             __u_short temp;
-            #ifdef DEBUG
             scanf(" %hu", &temp);
-            #else
-            scanf(" %hu", &temp);
-            #endif
 
             memory[memc] = temp;
 
@@ -95,8 +114,6 @@ int execute_bf(FILE* fptr){
             }
             
             size_t go_back = loop_counters[--loops];
-            loop_counters[loops] = 0;
-            
 
             if(memory[memc] != 0){
                 pc = go_back - 1;
@@ -106,6 +123,9 @@ int execute_bf(FILE* fptr){
             break;
         }
 
+        #ifdef DEBUG
+        print_memory(memory_index, DEBUG_MEMORY_DEPTH, memc, pc, loops, invalid_loop, memory);
+        #endif
         ++pc;
     }
 
