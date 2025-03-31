@@ -43,6 +43,7 @@ int execute_bf(FILE* fptr){
 
         char command;
         #ifdef DEBUG
+        printf("\n------------------------------------------------------");
         printf("\nWaiting command: %c | pc: %zu\n", c, pc);
         scanf(" %c", &command);
         while(command == 'a' || command == 'd'){
