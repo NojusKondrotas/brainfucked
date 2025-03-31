@@ -139,7 +139,7 @@ int main(int argc, char **argv){
     FILE *fptr;
 
     if(argc < 2 || (fptr = fopen(argv[1], "r")) == NULL){
-        fprintf(stderr, "File opening failure: %s\n", argv[0]);
+        fprintf(stderr, "No direction to a Brainfuck(.b, .bf) file: %s\n", argv[0]);
         return EXIT_FAILURE;
     }
 
