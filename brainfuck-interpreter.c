@@ -31,7 +31,8 @@ int execute_bf(FILE* fptr){
     size_t invalid_loop = 0, invalid_loop_start_index = 0;
 
     #ifdef DEBUG
-    size_t memory_index = 0;
+    char command;
+    size_t memory_index = 0, commands_forward = 0, commands_since_start = 0;
     #endif
 
     while((c = fgetc(fptr)) != EOF){
@@ -41,14 +42,21 @@ int execute_bf(FILE* fptr){
             loop_counters = new_data;
         }
 
-        char command;
         #ifdef DEBUG
+        if(commands_forward){
+            printf("command: %zu\n", commands_forward);
+            --commands_forward;
+            goto end;
+        }
         printf("\n------------------------------------------------------");
         printf("\nWaiting command: %c | pc: %zu\n", c, pc);
-        scanf(" %c", &command);
+
+        command = getchar();
+
+        if(command == 'j')
+            scanf(" %zu", &commands_forward);
+
         while(command == 'a' || command == 'd'){
-            while(getchar() != '\n');
-            //printf("%hu\n", command);
             switch(command){
                 case 'a':
                     --memory_index;
@@ -61,6 +69,10 @@ int execute_bf(FILE* fptr){
             print_memory(memory_index, DEBUG_MEMORY_DEPTH, memc, pc, loops, invalid_loop, memory);
             scanf(" %c", &command);
         }
+
+        while(getchar() != '\n');
+
+        end:
         printf("\nExecuting command: %c | pc: %zu\n", c, pc);
         #endif
 
@@ -85,7 +97,9 @@ int execute_bf(FILE* fptr){
             break;
         case ',':
             __u_short temp;
-            scanf(" %hu", &temp);
+            scanf("%hu", &temp);
+
+            while(getchar() != '\n');
 
             memory[memc] = temp;
 
@@ -126,9 +140,14 @@ int execute_bf(FILE* fptr){
 
         #ifdef DEBUG
         print_memory(memory_index, DEBUG_MEMORY_DEPTH, memc, pc, loops, invalid_loop, memory);
+        ++commands_since_start;
         #endif
         ++pc;
     }
+
+    #ifdef DEBUG
+    printf("\nprogram length : %zu\n", commands_since_start);
+    #endif
 
     free(memory);
     free(loop_counters);
