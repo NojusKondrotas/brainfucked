@@ -4,6 +4,35 @@
 
 #define MEMORY_SIZE 30000
 
+// enum op_e{
+//     OP_INC_PC = '>',
+//     OP_DEC_PC = '<',
+//     OP_INC_VAL = '+',
+//     OP_DEC_VAL = '-',
+//     OP_IN = ',',
+//     OP_OUT = '.',
+//     OP_JMP_FWD = '[',
+//     OP_JMP_BCK = ']'
+
+// }typedef OP;
+
+__u_short get_input(){
+    char in_data[3] = {0};
+    __u_short temp = 0;
+    fscanf(stdin, "%3s", in_data);
+
+    if(in_data[0] < 48 || in_data[0] > 57)
+        return in_data[0];
+    
+    int i = 0;
+    while(in_data[i] > 47 && in_data[i] < 58){
+        temp *= 10;
+        temp += in_data[i++] - 48;
+    }
+
+    return temp;
+}
+
 void print_memory(size_t index, size_t length, size_t memc, size_t pc, size_t loops, size_t loop_condition, __u_char *mem){
     size_t end = index + length;
 
@@ -95,9 +124,8 @@ int execute_bf(FILE* fptr){
         case '-':
             memory[memc]--;
             break;
-        case ',':
-            __u_short temp;
-            scanf("%hu", &temp);
+        case ',':   
+            __u_short temp = get_input();
 
             while(getchar() != '\n');
 
@@ -106,7 +134,7 @@ int execute_bf(FILE* fptr){
             break;
         case '.':
             #ifdef DEBUG
-            printf("printed value: %hu\n", (__u_short)memory[memc]);
+            printf("printed value: %d\n", memory[memc]);
             #else
             putchar(memory[memc]);
             #endif
