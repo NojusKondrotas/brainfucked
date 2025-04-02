@@ -4,17 +4,17 @@
 
 #define MEMORY_SIZE 30000
 
-// enum op_e{
-//     OP_INC_PC = '>',
-//     OP_DEC_PC = '<',
-//     OP_INC_VAL = '+',
-//     OP_DEC_VAL = '-',
-//     OP_IN = ',',
-//     OP_OUT = '.',
-//     OP_JMP_FWD = '[',
-//     OP_JMP_BCK = ']'
+enum op_e{
+    OP_INC_PC = '>',
+    OP_DEC_PC = '<',
+    OP_INC_VAL = '+',
+    OP_DEC_VAL = '-',
+    OP_IN = ',',
+    OP_OUT = '.',
+    OP_JMP_FWD = '[',
+    OP_JMP_BCK = ']'
 
-// }typedef OP;
+}typedef OP;
 
 __u_short get_input(){
     char in_data[3] = {0};
@@ -105,26 +105,26 @@ int execute_bf(FILE* fptr){
         printf("\nExecuting command: %c | pc: %zu\n", c, pc);
         #endif
 
-        if(c != ']' && c != '[' && invalid_loop){
+        if(c != OP_JMP_BCK && c != OP_JMP_FWD && invalid_loop){
             ++pc;
             continue;
         }
 
         switch (c)
         {
-        case '>':
+        case OP_INC_PC:
             memc = (memc + 1) % MEMORY_SIZE;
             break;
-        case '<':
+        case OP_DEC_PC:
             memc = (memc - 1 + MEMORY_SIZE) % MEMORY_SIZE;
             break;
-        case '+':
+        case OP_INC_VAL:
             memory[memc]++;
             break;
-        case '-':
+        case OP_DEC_VAL:
             memory[memc]--;
             break;
-        case ',':   
+        case OP_IN:   
             __u_short temp = get_input();
 
             while(getchar() != '\n');
@@ -132,7 +132,7 @@ int execute_bf(FILE* fptr){
             memory[memc] = temp;
 
             break;
-        case '.':
+        case OP_OUT:
             #ifdef DEBUG
             printf("printed value: %d\n", memory[memc]);
             #else
@@ -140,14 +140,14 @@ int execute_bf(FILE* fptr){
             #endif
 
             break;
-        case '[':
+        case OP_JMP_FWD:
             loop_counters[loops++] = pc;
             if(memory[memc] == 0 && !invalid_loop){
                 invalid_loop = 1;
                 invalid_loop_start_index = loops;
             }
             break;
-        case ']':
+        case OP_JMP_BCK:
             if(loops == 0)
                 return EXIT_FAILURE;
 
