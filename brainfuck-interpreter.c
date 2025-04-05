@@ -3,6 +3,7 @@
 #include <string.h>
 
 #define MEMORY_SIZE 30000
+#define MAX_WRAPPING_INDEX 65535
 
 enum e_op{
     OP_INC_PC = '>',
@@ -34,11 +35,11 @@ __u_short get_input(){
     return num_val;
 }
 
-void print_memory(size_t index, size_t length, size_t memc, size_t pc, size_t loops, size_t loop_condition, __u_char *memory){
-    size_t end = index + length;
-
-    while(index <= end)
-        printf("%d ", (int)memory[index++]);
+void print_memory(__u_short index, size_t length, size_t memc, size_t pc, size_t loops, size_t loop_condition, __u_char *memory){
+    for(size_t i = 0; i < length; ++i){
+        printf("%d ", (int)memory[index]);
+        index = (index + 1) % MEMORY_SIZE;
+    }
     printf("| memc : %zu | value at memc : %hu | amount of loops : %zu | current loop condition : %zu | pc : %zu\n", memc, (__u_short)memory[memc], loops, loop_condition, pc);
 }
 
@@ -48,7 +49,8 @@ int execute_bf(FILE* fptr){
         fprintf(stderr, "Failure allocating memory\n");
         return EXIT_FAILURE;
     }
-    size_t pc = 0, memc = 0;
+    size_t pc = 0;
+    __u_short memc = 0;
     
     size_t loop_stack_capacity = 10, loops_amount = 0;
     size_t *loop_lengths = (size_t *)calloc(loop_stack_capacity, sizeof(size_t));
@@ -62,7 +64,8 @@ int execute_bf(FILE* fptr){
 
     #ifdef DEBUG
     char command;
-    size_t memory_index = 0, commands_forward = 0, commands_since_start = 0;
+    size_t commands_forward = 0, commands_since_start = 0;
+    __u_short memory_index = 0;
     #endif
 
     while((c = fgetc(fptr)) != EOF){
@@ -83,9 +86,10 @@ int execute_bf(FILE* fptr){
             switch(command){
                 case 'a':
                     --memory_index;
+                    memory_index = memory_index / MAX_WRAPPING_INDEX * (MEMORY_SIZE - 1) + (1 - memory_index/MAX_WRAPPING_INDEX) * memory_index;
                     break;
                 case 'd':
-                    ++memory_index;
+                    memory_index = (memory_index + 1) % MEMORY_SIZE;
                     break;
             }
 
@@ -116,7 +120,7 @@ int execute_bf(FILE* fptr){
             memc = (memc + 1) % MEMORY_SIZE;
             break;
         case OP_DEC_PC:
-            memc = (memc - 1 + MEMORY_SIZE) % MEMORY_SIZE;
+            memc = memc / MAX_WRAPPING_INDEX * (MEMORY_SIZE - 1) + (1 - memc/MAX_WRAPPING_INDEX) * memc;
             break;
         case OP_INC_VAL:
             memory[memc]++;
