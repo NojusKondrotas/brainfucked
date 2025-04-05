@@ -4,7 +4,7 @@
 
 #define MEMORY_SIZE 30000
 
-enum op_e{
+enum e_op{
     OP_INC_PC = '>',
     OP_DEC_PC = '<',
     OP_INC_VAL = '+',
@@ -14,11 +14,12 @@ enum op_e{
     OP_JMP_FWD = '[',
     OP_JMP_BCK = ']'
 
-}typedef OP;
+};
+typedef enum e_op OP;
 
 __u_short get_input(){
     char in_data[3] = {0};
-    __u_short temp = 0;
+    __u_short num_val = 0;
     fscanf(stdin, "%3s", in_data);
 
     if(in_data[0] < 48 || in_data[0] > 57)
@@ -26,19 +27,19 @@ __u_short get_input(){
     
     int i = 0;
     while(in_data[i] > 47 && in_data[i] < 58){
-        temp *= 10;
-        temp += in_data[i++] - 48;
+        num_val *= 10;
+        num_val += in_data[i++] - 48;
     }
 
-    return temp;
+    return num_val;
 }
 
-void print_memory(size_t index, size_t length, size_t memc, size_t pc, size_t loops, size_t loop_condition, __u_char *mem){
+void print_memory(size_t index, size_t length, size_t memc, size_t pc, size_t loops, size_t loop_condition, __u_char *memory){
     size_t end = index + length;
 
     while(index <= end)
-        printf("%d ", (int)mem[index++]);
-    printf("| memc : %zu | value at memc : %hu | loops : %zu | loop condition : %zu | pc : %zu\n", memc, (__u_short)mem[memc], loops, loop_condition, pc);
+        printf("%d ", (int)memory[index++]);
+    printf("| memc : %zu | value at memc : %hu | amount of loops : %zu | current loop condition : %zu | pc : %zu\n", memc, (__u_short)memory[memc], loops, loop_condition, pc);
 }
 
 int execute_bf(FILE* fptr){
@@ -49,9 +50,9 @@ int execute_bf(FILE* fptr){
     }
     size_t pc = 0, memc = 0;
     
-    size_t loop_stack_capacity = 10, loops = 0;
-    size_t *loop_counters = (size_t *)calloc(loop_stack_capacity, sizeof(size_t));
-    if(!loop_counters){
+    size_t loop_stack_capacity = 10, loops_amount = 0;
+    size_t *loop_lengths = (size_t *)calloc(loop_stack_capacity, sizeof(size_t));
+    if(!loop_lengths){
         fprintf(stderr, "Failure allocating memory\n");
         return EXIT_FAILURE;
     }
@@ -65,15 +66,8 @@ int execute_bf(FILE* fptr){
     #endif
 
     while((c = fgetc(fptr)) != EOF){
-        if(loops == loop_stack_capacity){
-            loop_stack_capacity *= 2;
-            size_t *new_data = (size_t *)realloc(loop_counters, loop_stack_capacity * sizeof(size_t));
-            loop_counters = new_data;
-        }
-
         #ifdef DEBUG
         if(commands_forward){
-            printf("command: %zu\n", commands_forward);
             --commands_forward;
             goto end;
         }
@@ -95,7 +89,7 @@ int execute_bf(FILE* fptr){
                     break;
             }
 
-            print_memory(memory_index, DEBUG_MEMORY_DEPTH, memc, pc, loops, invalid_loop, memory);
+            print_memory(memory_index, DEBUG_MEMORY_DEPTH, memc, pc, loops_amount, invalid_loop, memory);
             scanf(" %c", &command);
         }
 
@@ -104,6 +98,12 @@ int execute_bf(FILE* fptr){
         end:
         printf("\nExecuting command: %c | pc: %zu\n", c, pc);
         #endif
+
+        if(loops_amount == loop_stack_capacity){
+            loop_stack_capacity *= 2;
+            size_t *new_data = (size_t *)realloc(loop_lengths, loop_stack_capacity * sizeof(size_t));
+            loop_lengths = new_data;
+        }
 
         if(c != OP_JMP_BCK && c != OP_JMP_FWD && invalid_loop){
             ++pc;
@@ -125,11 +125,11 @@ int execute_bf(FILE* fptr){
             memory[memc]--;
             break;
         case OP_IN:   
-            __u_short temp = get_input();
+            __u_short in_val = get_input();
 
             while(getchar() != '\n');
 
-            memory[memc] = temp;
+            memory[memc] = in_val;
 
             break;
         case OP_OUT:
@@ -141,22 +141,24 @@ int execute_bf(FILE* fptr){
 
             break;
         case OP_JMP_FWD:
-            loop_counters[loops++] = pc;
-            if(memory[memc] == 0 && !invalid_loop){
+            loop_lengths[loops_amount++] = pc;
+
+            if(memory[memc] == 0){
                 invalid_loop = 1;
-                invalid_loop_start_index = loops;
+                invalid_loop_start_index = loops_amount;
             }
+
             break;
         case OP_JMP_BCK:
-            if(loops == 0)
+            if(loops_amount == 0)
                 return EXIT_FAILURE;
 
-            if(loops == invalid_loop_start_index){
+            if(loops_amount == invalid_loop_start_index){
                 invalid_loop = 0;
                 invalid_loop_start_index = 0;
             }
             
-            size_t go_back = loop_counters[--loops];
+            size_t go_back = loop_lengths[--loops_amount];
 
             if(memory[memc] != 0){
                 pc = go_back - 1;
@@ -167,7 +169,7 @@ int execute_bf(FILE* fptr){
         }
 
         #ifdef DEBUG
-        print_memory(memory_index, DEBUG_MEMORY_DEPTH, memc, pc, loops, invalid_loop, memory);
+        print_memory(memory_index, DEBUG_MEMORY_DEPTH, memc, pc, loops_amount, invalid_loop, memory);
         ++commands_since_start;
         #endif
         ++pc;
@@ -178,7 +180,7 @@ int execute_bf(FILE* fptr){
     #endif
 
     free(memory);
-    free(loop_counters);
+    free(loop_lengths);
 
     return EXIT_SUCCESS;
 }
