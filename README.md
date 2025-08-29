@@ -2,7 +2,7 @@
 Brainfucked - a Brainfuck interpreter with lightweight debugging capabilities. Written in C.
 
 ### DEBUG mode
-Debugging can be enabled by uncommenting the DEBUG_FLAGS declaration in Makefile or by specifying DEBUG and DEBUG_MEMORY_DEPTH flags during compilation.  
+Debugging can be enabled by uncommenting the DEBUG_FLAGS declaration in Makefile or by specifying the DEBUG_FLAGS var during compilation.  
 Feel free to specify the desired DEBUG_MEMORY_DEPTH (the amount of memory cells to be displayed).
 
 Navigation:
